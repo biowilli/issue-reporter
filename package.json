@@ -1,0 +1,68 @@
+{
+  "name": "@biowilli/issue-reporter",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Framework-agnostic feedback reporter with screenshot capture for GitLab, GitHub, Jira and custom issue trackers",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "feedback",
+    "screenshot",
+    "gitlab",
+    "github",
+    "jira",
+    "issue-tracker",
+    "bug-report",
+    "react",
+    "vue",
+    "angular",
+    "user-feedback",
+    "framework-agnostic"
+  ],
+  "author": "biowilli",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fairkom/issue-reporter.git"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "rollup": "^4.30.1",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-postcss": "^4.0.2",
+    "tslib": "^2.8.1",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "dom-to-image-more": "^3.7.2"
+  }
+}
