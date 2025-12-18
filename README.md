@@ -1,6 +1,8 @@
-# @fairkom/issue-reporter
+# @biowilli/issue-reporter
 
-Framework-agnostic feedback reporter with screenshot capture for GitLab, GitHub, Jira and custom issue trackers.
+A powerful, framework-agnostic feedback reporter with automatic screenshot capture and annotation tools for GitLab, GitHub, Jira and custom issue trackers.
+
+Turn user feedback into actionable issues with just one click!
 
 ## Features
 
@@ -16,9 +18,13 @@ Framework-agnostic feedback reporter with screenshot capture for GitLab, GitHub,
 ## Installation
 
 ```bash
-npm install @fairkom/issue-reporter
-# or
-yarn add @fairkom/issue-reporter
+npm install @biowilli/issue-reporter
+```
+
+Or with yarn:
+
+```bash
+yarn add @biowilli/issue-reporter
 ```
 
 ## Quick Start
@@ -26,25 +32,33 @@ yarn add @fairkom/issue-reporter
 ### React
 
 ```tsx
-import { FeedbackButton, GitLabAdapter } from '@fairkom/issue-reporter';
+import { FeedbackButton, GitLabAdapter } from '@biowilli/issue-reporter';
+
+// 1. Create an adapter for your issue tracker (GitLab example)
+const feedbackAdapter = new GitLabAdapter({
+  baseUrl: 'https://gitlab.com', // Your GitLab instance URL
+  projectId: '1234', // Your GitLab project ID
+  accessToken: import.meta.env.VITE_GITLAB_ACCESS_TOKEN, // Access token from environment
+  labels: ['user-feedback', 'bug'], // Labels to add to issues
+});
 
 function App() {
-  const adapter = new GitLabAdapter({
-    baseUrl: 'https://git.fairkom.net',
-    projectId: '1234',
-    accessToken: process.env.REACT_APP_GITLAB_TOKEN!,
-    labels: ['user-feedback', 'bug'],
-  });
-
   return (
     <div>
       <h1>My App</h1>
+
+      {/* 2. Add the feedback button anywhere in your app */}
       <FeedbackButton
-        adapter={adapter}
-        buttonText="🐛 Report Bug"
+        adapter={feedbackAdapter}
         position="bottom-right"
+        includeMetadata={true}
+        textLabels={{
+          buttonText: 'Report Issue',
+          modalTitle: 'Report a Problem',
+        }}
         onSuccess={(response) => {
           console.log('Issue created:', response.url);
+          alert(`Thank you! Issue created: ${response.url}`);
         }}
       />
     </div>
@@ -52,17 +66,21 @@ function App() {
 }
 ```
 
+**That's it!** Users can now click the button to report issues with automatic screenshots.
+
 ### Vanilla JavaScript
 
 ```javascript
-import { createFeedbackReporter, GitLabAdapter } from '@fairkom/issue-reporter';
+import { createFeedbackReporter, GitLabAdapter } from '@biowilli/issue-reporter';
 
+// Create adapter
 const adapter = new GitLabAdapter({
-  baseUrl: 'https://git.fairkom.net',
+  baseUrl: 'https://gitlab.com',
   projectId: '1234',
   accessToken: 'your-gitlab-token',
 });
 
+// Create reporter
 const reporter = createFeedbackReporter({
   adapter,
   includeMetadata: true,
@@ -71,9 +89,9 @@ const reporter = createFeedbackReporter({
   },
 });
 
-// Render the feedback button
+// Render the button
 reporter.renderButton({
-  text: '🐛 Report Bug',
+  text: 'Report Bug',
   position: 'bottom-right',
 });
 ```
@@ -82,21 +100,23 @@ reporter.renderButton({
 
 ### GitLab Adapter
 
+The GitLab adapter allows you to create issues directly in your GitLab projects.
+
 ```typescript
-import { GitLabAdapter } from '@fairkom/issue-reporter';
+import { GitLabAdapter } from '@biowilli/issue-reporter';
 
 const adapter = new GitLabAdapter({
-  baseUrl: 'https://gitlab.com', // or your self-hosted GitLab
-  projectId: '1234',
-  accessToken: 'your-access-token',
-  labels: ['feedback', 'bug'], // optional
-  assigneeIds: [123], // optional, user IDs to assign
+  baseUrl: 'https://gitlab.com', // Your GitLab instance (gitlab.com or self-hosted)
+  projectId: '1234', // Your project ID (found in project settings)
+  accessToken: 'glpat-xxxxxxxxxxxx', // Your GitLab access token
+  labels: ['user-feedback', 'bug'], // Optional: labels to add to issues
+  assigneeIds: [123], // Optional: user IDs to auto-assign issues
 });
 ```
 
-#### GitLab Access Token Setup
+#### Setting Up GitLab Access Token
 
-The GitLab adapter requires an access token with the following permissions:
+To use the GitLab adapter, you need to create an access token with the right permissions:
 
 **Required Scopes:**
 - `api` - For creating issues and uploading files
@@ -131,47 +151,78 @@ The token/user needs at least **Reporter** role in the project to:
 
 ### GitHub Adapter
 
+The GitHub adapter creates issues in your GitHub repositories.
+
 ```typescript
-import { GitHubAdapter } from '@fairkom/issue-reporter';
+import { GitHubAdapter } from '@biowilli/issue-reporter';
 
 const adapter = new GitHubAdapter({
   baseUrl: 'https://api.github.com',
-  projectId: '', // not used for GitHub
-  owner: 'your-username',
-  repo: 'your-repo',
-  accessToken: 'your-github-token',
-  labels: ['feedback', 'bug'], // optional
-  assignees: ['username'], // optional
+  projectId: '', // Not used for GitHub
+  owner: 'your-username', // Repository owner
+  repo: 'your-repo', // Repository name
+  accessToken: 'ghp_xxxxxxxxxxxx', // GitHub personal access token
+  labels: ['user-feedback', 'bug'], // Optional: issue labels
+  assignees: ['username'], // Optional: GitHub usernames to assign
 });
 ```
 
+**GitHub Token:** Create a Personal Access Token at https://github.com/settings/tokens with `repo` scope.
+
 ### Custom Adapter
 
-Create your own adapter by implementing the `IssueTrackerAdapter` interface:
+You can create your own adapter for any issue tracker (Jira, Linear, Asana, etc.):
 
 ```typescript
-import { IssueTrackerAdapter, FeedbackData, IssueResponse } from '@fairkom/issue-reporter';
+import { IssueTrackerAdapter, FeedbackData, IssueResponse } from '@biowilli/issue-reporter';
 
-class CustomAdapter implements IssueTrackerAdapter {
+class MyCustomAdapter implements IssueTrackerAdapter {
   async createIssue(feedback: FeedbackData): Promise<IssueResponse | null> {
-    // Your implementation
-    const response = await fetch('your-api-endpoint', {
+    // 1. Upload screenshot if provided
+    let screenshotUrl = null;
+    if (feedback.screenshot) {
+      screenshotUrl = await this.uploadScreenshot(feedback.screenshot);
+    }
+
+    // 2. Create issue in your system
+    const response = await fetch('https://your-api.com/issues', {
       method: 'POST',
-      body: JSON.stringify(feedback),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: feedback.title,
+        description: feedback.description,
+        screenshot: screenshotUrl,
+        metadata: feedback.metadata,
+      }),
     });
 
+    const data = await response.json();
+
+    // 3. Return issue details
     return {
-      id: 'issue-id',
-      url: 'issue-url',
-      title: feedback.title,
+      id: data.id,
+      url: data.url,
+      title: data.title,
     };
   }
 
   async uploadScreenshot(screenshot: Blob): Promise<string | null> {
-    // Optional: implement screenshot upload
-    return 'screenshot-url';
+    // Optional: Upload screenshot to your storage
+    const formData = new FormData();
+    formData.append('file', screenshot);
+
+    const response = await fetch('https://your-api.com/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+    return data.url;
   }
 }
+
+// Use your custom adapter
+const adapter = new MyCustomAdapter();
 ```
 
 ## API Reference
@@ -373,6 +424,45 @@ When `includeMetadata` is enabled, the following information is automatically co
 6. **Issue Creation** - Screenshot is uploaded and issue is created via adapter
 7. **Success** - User receives confirmation with issue URL
 
+## Real-World Example
+
+Here's a complete example with German labels and custom styling:
+
+```tsx
+import { FeedbackButton, GitLabAdapter } from '@biowilli/issue-reporter';
+
+const feedbackAdapter = new GitLabAdapter({
+  baseUrl: 'https://git.fairkom.net',
+  projectId: '123',
+  accessToken: import.meta.env.VITE_GITLAB_ACCESS_TOKEN,
+  labels: ['User-Feedback', 'Frontend'],
+});
+
+<FeedbackButton
+  adapter={feedbackAdapter}
+  position='bottom-right'
+  includeMetadata={true}
+  textLabels={{
+    buttonText: 'Problem melden',
+    modalTitle: 'Problem melden',
+    titleLabel: 'Titel',
+    descriptionLabel: 'Beschreibung',
+    submitButtonText: 'Problem melden',
+  }}
+  buttonStyles={{
+    backgroundColor: '#0070B7',
+    hoverBackgroundColor: '#005a92',
+    borderRadius: '8px',
+  }}
+  modalStyles={{
+    primaryButtonColor: '#0070B7',
+  }}
+  onSuccess={(response) => {
+    alert(`Issue created: ${response.url}`);
+  }}
+/>
+```
+
 ## Development
 
 ```bash
@@ -382,13 +472,22 @@ npm install
 # Build the package
 npm run build
 
-# Watch mode
+# Watch mode for development
 npm run dev
+
+# Publish to npm
+npm version patch  # or minor/major
+npm publish --access public
 ```
+
+## Links
+
+- **npm Package:** https://www.npmjs.com/package/@biowilli/issue-reporter
+- **Issues:** https://github.com/fairkom/issue-reporter/issues
 
 ## License
 
-MIT © Fairkom
+MIT © biowilli
 
 ## Contributing
 
