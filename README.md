@@ -4,6 +4,8 @@ A powerful, framework-agnostic feedback reporter with automatic screenshot captu
 
 Turn user feedback into actionable issues with just one click!
 
+![App Preview](./app-preview.png)
+
 ## Features
 
 - **Automatic Screenshot Capture** - Uses dom-to-image-more to capture the current page
@@ -143,6 +145,7 @@ The token/user needs at least **Reporter** role in the project to:
 - Upload files (screenshots)
 
 **Security Best Practices:**
+- **⚠️ IMPORTANT: Never store GitLab/GitHub tokens in your frontend code.** For production applications, implement a backend proxy API that securely stores credentials on the server and forwards requests to the issue tracker. This prevents exposing sensitive tokens to users.
 - Use **Project Access Tokens** instead of Personal Access Tokens
 - Store tokens in environment variables (`.env.local`), never commit them
 - Use the minimum required scopes
