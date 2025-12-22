@@ -1,6 +1,6 @@
 {
   "name": "@biowilli/issue-reporter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Framework-agnostic feedback reporter with screenshot capture for GitLab, GitHub, Jira and custom issue trackers",
   "main": "dist/index.js",
