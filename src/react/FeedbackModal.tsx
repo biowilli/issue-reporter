@@ -32,6 +32,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [includeScreenshot, setIncludeScreenshot] = useState(true);
   const [isEditingScreenshot, setIsEditingScreenshot] = useState(false);
+  const [includeMetadataState, setIncludeMetadataState] = useState(false);
+  const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
 
   // Default text labels
   const defaultLabels = {
@@ -43,6 +45,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     screenshotLabel: 'Screenshot (optional)',
     screenshotHint: 'Upload a screenshot or press your print screen key and paste',
     includeScreenshotLabel: 'Include screenshot',
+    includeMetadataLabel: 'Include system information',
+    labelsLabel: 'Category',
     editButtonText: 'Edit',
     removeButtonText: 'Remove',
     cancelButtonText: 'Cancel',
@@ -115,7 +119,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         title: title.trim(),
         description: description.trim(),
         screenshot: includeScreenshot && screenshot ? screenshot : undefined,
-        metadata: includeMetadata ? getSystemMetadata() : undefined,
+        metadata: includeMetadataState ? getSystemMetadata() : undefined,
+        labels: selectedLabels.length > 0 ? selectedLabels : undefined,
       };
 
       const response = await adapter.createIssue(feedbackData);
@@ -232,6 +237,66 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
               required
               disabled={isSubmitting}
             />
+          </div>
+
+          {/* Label Selection */}
+          {labels && labels.length > 0 && (
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: modalStyles?.labelColor }}>
+                {defaultLabels.labelsLabel}
+              </label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {labels.map((label) => (
+                  <label
+                    key={label}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '8px 12px',
+                      border: `2px solid ${selectedLabels.includes(label) ? (modalStyles?.primaryButtonColor || '#4CAF50') : '#ddd'}`,
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      backgroundColor: selectedLabels.includes(label) ? (modalStyles?.primaryButtonColor || '#4CAF50') + '15' : 'transparent',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedLabels.includes(label)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedLabels([...selectedLabels, label]);
+                        } else {
+                          setSelectedLabels(selectedLabels.filter((l) => l !== label));
+                        }
+                      }}
+                      style={{ marginRight: '6px' }}
+                      disabled={isSubmitting}
+                    />
+                    <span style={{ fontSize: '14px', fontWeight: '500' }}>{label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Metadata Toggle */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'flex', alignItems: 'center' }}>
+              <input
+                type="checkbox"
+                checked={includeMetadataState}
+                onChange={(e) => setIncludeMetadataState(e.target.checked)}
+                style={{ marginRight: '8px' }}
+                disabled={isSubmitting}
+              />
+              <span style={{ fontWeight: '600', fontSize: '14px', color: modalStyles?.labelColor }}>
+                {defaultLabels.includeMetadataLabel}
+              </span>
+            </label>
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '4px', marginLeft: '24px' }}>
+              Browser, OS, screen resolution, and page URL information
+            </p>
           </div>
 
           <div style={{ marginBottom: '16px' }}>

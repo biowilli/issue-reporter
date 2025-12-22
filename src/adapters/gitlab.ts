@@ -83,7 +83,7 @@ ${screenshotUrl ? `\n\n## Screenshot\n![Screenshot](${screenshotUrl})` : ''}`;
           body: JSON.stringify({
             title: feedback.title,
             description: fullDescription,
-            labels: this.config.labels || ['Feedback', 'User Report'],
+            labels: feedback.labels || [],
             assignee_ids: this.config.assigneeIds || [],
           }),
         }

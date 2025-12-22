@@ -15,6 +15,7 @@ export interface FeedbackData {
   description: string;
   screenshot?: Blob;
   metadata?: Record<string, unknown>;
+  labels?: string[];
 }
 
 /**
@@ -85,6 +86,8 @@ export interface TextLabels {
   screenshotLabel?: string;
   screenshotHint?: string;
   includeScreenshotLabel?: string;
+  includeMetadataLabel?: string;
+  labelsLabel?: string;
   editButtonText?: string;
   removeButtonText?: string;
   cancelButtonText?: string;
