@@ -52,6 +52,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     cancelButtonText: 'Cancel',
     submitButtonText: 'Submit Issue',
     submittingButtonText: 'Submitting...',
+    validationMessage: 'Please fill in both title and description',
     ...textLabels,
   };
 
@@ -108,7 +109,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     e.preventDefault();
 
     if (!title.trim() || !description.trim()) {
-      alert('Please fill in both title and description');
+      alert(defaultLabels.validationMessage);
       return;
     }
 
@@ -127,7 +128,6 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
       if (response) {
         onSuccess?.(response);
-        alert(`Issue created successfully! View it at: ${response.url}`);
         onClose();
       } else {
         throw new Error('Failed to create issue');
@@ -135,7 +135,6 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     } catch (error) {
       const err = error instanceof Error ? error : new Error('Unknown error');
       onError?.(err);
-      alert('Failed to submit feedback. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

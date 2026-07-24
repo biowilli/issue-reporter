@@ -94,6 +94,7 @@ export interface TextLabels {
   submitButtonText?: string;
   submittingButtonText?: string;
   capturingButtonText?: string;
+  validationMessage?: string;
 }
 
 /**

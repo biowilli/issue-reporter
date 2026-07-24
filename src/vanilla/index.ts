@@ -180,7 +180,6 @@ export function createFeedbackReporter(config: FeedbackReporterConfig) {
 
         if (response) {
           config.onSuccess?.(response);
-          alert(`Issue created successfully! View it at: ${response.url}`);
           closeModal();
         } else {
           throw new Error('Failed to create issue');
@@ -188,7 +187,6 @@ export function createFeedbackReporter(config: FeedbackReporterConfig) {
       } catch (error) {
         const err = error instanceof Error ? error : new Error('Unknown error');
         config.onError?.(err);
-        alert('Failed to submit feedback. Please try again.');
       } finally {
         submitBtn.textContent = 'Submit Issue';
         submitBtn.disabled = false;
