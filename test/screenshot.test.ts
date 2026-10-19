@@ -79,6 +79,23 @@ describe('captureScreenshot', () => {
 });
 
 describe('getSystemMetadata', () => {
+  afterEach(() => {
+    window.scrollTo(0, 0);
+    document.body.innerHTML = '';
+  });
+
+  it('reports where the page was scrolled to and how large it is', () => {
+    buildLongPage();
+    window.scrollTo(0, 1500);
+
+    const metadata = getSystemMetadata();
+
+    expect(metadata.scrollX).toBe(0);
+    expect(metadata.scrollY).toBe(1500);
+    expect(metadata.pageHeight).toBe(PAGE_HEIGHT);
+    expect(metadata.pageWidth).toBe(document.documentElement.scrollWidth);
+  });
+
   it('reports the page address and the viewport size', () => {
     const metadata = getSystemMetadata();
 

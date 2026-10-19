@@ -226,6 +226,10 @@ export function getSystemMetadata(): Record<string, unknown> {
     viewportWidth: window.innerWidth,
     viewportHeight: window.innerHeight,
     viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+    scrollX: Math.round(window.scrollX),
+    scrollY: Math.round(window.scrollY),
+    pageWidth: document.documentElement.scrollWidth,
+    pageHeight: document.documentElement.scrollHeight,
     devicePixelRatio: devicePixelRatio,
     colorDepth: `${colorDepth}-bit`,
 
