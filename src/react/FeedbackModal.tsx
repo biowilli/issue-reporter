@@ -18,6 +18,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   adapter,
   labels,
   includeMetadata = true,
+  screenshotArea = 'page',
   onSuccess,
   onError,
   onClose,
@@ -66,7 +67,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     } else {
       // Fallback: capture screenshot
       const capture = async () => {
-        const blob = await captureScreenshot();
+        const blob = await captureScreenshot(undefined, { area: screenshotArea });
         if (blob) {
           setScreenshot(blob);
           const url = URL.createObjectURL(blob);

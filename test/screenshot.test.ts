@@ -12,6 +12,18 @@ const buildLongPage = () => {
   `;
 };
 
+const colourAt = async (blob: Blob, x: number, y: number) => {
+  const bitmap = await createImageBitmap(blob);
+  const canvas = document.createElement('canvas');
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const context = canvas.getContext('2d')!;
+  context.drawImage(bitmap, 0, 0);
+  bitmap.close();
+  const [red, green, blue] = context.getImageData(x, y, 1, 1).data;
+  return { red, green, blue };
+};
+
 const imageSize = async (blob: Blob) => {
   const bitmap = await createImageBitmap(blob);
   const size = { width: bitmap.width, height: bitmap.height };
@@ -34,6 +46,28 @@ describe('captureScreenshot', () => {
     const size = await imageSize(blob!);
     expect(size.width).toBe(document.body.scrollWidth);
     expect(size.height).toBe(PAGE_HEIGHT);
+  });
+
+  it('keeps only the visible part of the page when asked for the viewport', async () => {
+    window.scrollTo(0, 1500);
+
+    const blob = await captureScreenshot(undefined, { area: 'viewport' });
+
+    expect(blob).not.toBeNull();
+    const size = await imageSize(blob!);
+    expect(size.width).toBe(document.documentElement.clientWidth);
+    expect(size.height).toBe(document.documentElement.clientHeight);
+    const centre = await colourAt(blob!, size.width / 2, size.height / 2);
+    expect(centre).toEqual({ red: 0, green: 0, blue: 255 });
+  });
+
+  it('crops the viewport from the top while the page is not scrolled', async () => {
+    const blob = await captureScreenshot(undefined, { area: 'viewport' });
+
+    const size = await imageSize(blob!);
+    expect(size.height).toBe(document.documentElement.clientHeight);
+    const centre = await colourAt(blob!, size.width / 2, size.height / 2);
+    expect(centre).toEqual({ red: 255, green: 0, blue: 0 });
   });
 
   it('shows the feedback button again after capturing', async () => {

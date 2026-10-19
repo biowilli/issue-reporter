@@ -1,11 +1,44 @@
 import domtoimage from 'dom-to-image-more';
+import type { ScreenshotArea } from '../types';
+
+export interface CaptureOptions {
+  area?: ScreenshotArea;
+}
+
+async function cropToViewport(blob: Blob, element: HTMLElement): Promise<Blob> {
+  const bitmap = await createImageBitmap(blob);
+  const ratio = bitmap.width / element.scrollWidth;
+  const bounds = element.getBoundingClientRect();
+  const x = Math.max(0, Math.round(-bounds.left * ratio));
+  const y = Math.max(0, Math.round(-bounds.top * ratio));
+  const width = Math.min(bitmap.width - x, Math.round(document.documentElement.clientWidth * ratio));
+  const height = Math.min(bitmap.height - y, Math.round(document.documentElement.clientHeight * ratio));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d');
+  if (!context) {
+    bitmap.close();
+    return blob;
+  }
+  context.drawImage(bitmap, x, y, width, height, 0, 0, width, height);
+  bitmap.close();
+
+  const cropped = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+  return cropped ?? blob;
+}
 
 /**
  * Captures a screenshot of the current page using dom-to-image-more
  * @param element Optional element to capture (defaults to document.body)
+ * @param options `area: 'viewport'` keeps only the part currently visible on screen (defaults to the whole element)
  * @returns Promise resolving to a Blob of the screenshot
  */
-export async function captureScreenshot(element?: HTMLElement): Promise<Blob | null> {
+export async function captureScreenshot(
+  element?: HTMLElement,
+  options: CaptureOptions = {}
+): Promise<Blob | null> {
   try {
     console.log('[issue-reporter] Starting screenshot capture with dom-to-image-more...');
 
@@ -64,6 +97,9 @@ export async function captureScreenshot(element?: HTMLElement): Promise<Blob | n
     });
 
     console.log('[issue-reporter] Screenshot blob created:', blob ? `${blob.size} bytes` : 'null');
+    if (blob && options.area === 'viewport') {
+      return await cropToViewport(blob, targetElement);
+    }
     return blob;
   } catch (error) {
     console.error('[issue-reporter] Error capturing screenshot:', error);
