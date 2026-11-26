@@ -16,6 +16,7 @@ export const FeedbackButton: React.FC<FeedbackButtonProps> = ({
   adapter,
   labels,
   includeMetadata = true,
+  screenshotArea = 'page',
   onSuccess,
   onError,
   buttonStyles,
@@ -39,7 +40,7 @@ export const FeedbackButton: React.FC<FeedbackButtonProps> = ({
     setIsCapturing(true);
 
     // Capture screenshot BEFORE opening modal
-    const screenshot = await captureScreenshot();
+    const screenshot = await captureScreenshot(undefined, { area: screenshotArea });
     setCapturedScreenshot(screenshot);
 
     setIsCapturing(false);
@@ -106,6 +107,7 @@ export const FeedbackButton: React.FC<FeedbackButtonProps> = ({
           adapter={adapter}
           labels={labels}
           includeMetadata={includeMetadata}
+          screenshotArea={screenshotArea}
           onSuccess={onSuccess}
           onError={onError}
           onClose={handleCloseModal}

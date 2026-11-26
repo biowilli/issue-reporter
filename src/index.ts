@@ -1,5 +1,6 @@
 // Core functionality
 export { captureScreenshot, getSystemMetadata, blobToBase64 } from './core/screenshot';
+export type { CaptureOptions } from './core/screenshot';
 
 // Types
 export type {
@@ -8,6 +9,7 @@ export type {
   IssueResponse,
   IssueTrackerAdapter,
   FeedbackReporterConfig,
+  ScreenshotArea,
 } from './types';
 
 // Adapters

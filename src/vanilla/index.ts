@@ -58,7 +58,7 @@ export function createFeedbackReporter(config: FeedbackReporterConfig) {
    */
   async function openModal() {
     // Capture screenshot
-    const screenshot = await captureScreenshot();
+    const screenshot = await captureScreenshot(undefined, { area: config.screenshotArea });
     const screenshotUrl = screenshot ? URL.createObjectURL(screenshot) : null;
 
     // Create modal

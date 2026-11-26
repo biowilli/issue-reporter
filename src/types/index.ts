@@ -97,6 +97,8 @@ export interface TextLabels {
   validationMessage?: string;
 }
 
+export type ScreenshotArea = 'page' | 'viewport';
+
 /**
  * Feedback reporter configuration
  */
@@ -104,6 +106,7 @@ export interface FeedbackReporterConfig {
   adapter: IssueTrackerAdapter;
   labels?: string[];
   includeMetadata?: boolean;
+  screenshotArea?: ScreenshotArea;
   onSuccess?: (response: IssueResponse) => void;
   onError?: (error: Error) => void;
   buttonStyles?: ButtonStyles;

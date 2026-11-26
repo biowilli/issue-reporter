@@ -240,6 +240,7 @@ const adapter = new MyCustomAdapter();
 | `position` | `'bottom-right' \| 'bottom-left' \| 'top-right' \| 'top-left' \| 'none'` | `'bottom-right'` | Button position |
 | `buttonClassName` | `string` | `undefined` | Custom CSS class for the button |
 | `includeMetadata` | `boolean` | `true` | Include system metadata in reports |
+| `screenshotArea` | `'page' \| 'viewport'` | `'page'` | Capture the whole page or only the part currently visible on screen |
 | `labels` | `string[]` | `[]` | Labels to add to issues |
 | `textLabels` | `TextLabels` | `{}` | Customize all text labels (see below) |
 | `buttonStyles` | `ButtonStyles` | `{}` | Customize button appearance (see below) |
@@ -401,6 +402,7 @@ When `includeMetadata` is enabled, the following information is automatically co
 - Viewport size
 - Device pixel ratio (for Retina displays)
 - Color depth
+- Scroll position and page size
 
 **Page Information:**
 - Current URL
@@ -420,7 +422,7 @@ When `includeMetadata` is enabled, the following information is automatically co
 ## How It Works
 
 1. **Button Click** - User clicks the feedback button
-2. **Screenshot Capture** - Automatically captures the current page using dom-to-image-more
+2. **Screenshot Capture** - Automatically captures the current page using dom-to-image-more (the whole page, or only the visible part with `screenshotArea="viewport"`)
 3. **Screenshot Editing** - User can annotate the screenshot with arrows, shapes, and pen
 4. **Feedback Form** - User fills in title and description
 5. **Metadata Collection** - Comprehensive system info is collected automatically
@@ -477,6 +479,12 @@ npm run build
 
 # Watch mode for development
 npm run dev
+
+# Type check
+npm run typecheck
+
+# Run the tests in headless Chrome (set PLAYWRIGHT_CHANNEL to use another installed browser)
+npm test
 
 # Publish to npm
 npm version patch  # or minor/major
